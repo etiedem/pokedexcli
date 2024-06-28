@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"github.com/etiedem/pokedexcli/internal/pokeapi"
 	"math/rand"
 	"os"
 	"strings"
