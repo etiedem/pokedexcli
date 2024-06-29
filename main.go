@@ -4,22 +4,18 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/etiedem/pokedexcli/internal/pokeapi"
+	"github.com/etiedem/pokedexcli/internal/pokecache"
+	"github.com/etiedem/pokedexcli/internal/pokeconfig"
 	"math/rand"
 	"os"
 	"strings"
 	"time"
 )
 
-type Config struct {
-	Next     *string
-	Previous *string
-	Pokedex  map[string]Pokemon
-}
-
 type cliCommand struct {
 	name        string
 	description string
-	callback    func(*Config, *string, *Cache) error
+	callback    func(*pokeconfig.Config, *string, *pokecache.Cache) error
 }
 
 func getCommands() map[string]cliCommand {
@@ -67,8 +63,8 @@ func getCommands() map[string]cliCommand {
 	}
 }
 
-func commandExplore(c *Config, param *string, cache *Cache) error {
-	resp := search_location(*param, cache)
+func commandExplore(c *pokeconfig.Config, param *string, cache *pokecache.Cache) error {
+	resp := pokeapi.SearchLocation(*param, cache)
 	fmt.Println("Found Pokemon:")
 	for _, pokemon := range resp.PokemonEncounters {
 		fmt.Printf(" - %s\n", pokemon.Pokemon.Name)
@@ -76,7 +72,7 @@ func commandExplore(c *Config, param *string, cache *Cache) error {
 	return nil
 }
 
-func commandCatch(c *Config, param *string, cache *Cache) error {
+func commandCatch(c *pokeconfig.Config, param *string, cache *pokecache.Cache) error {
 	resp := get_pokemon(*param, cache)
 	r := rand.Intn(resp.BaseExperience)
 	fmt.Printf("Throwing a Pokeball at %s...\n", resp.Name)
@@ -90,7 +86,7 @@ func commandCatch(c *Config, param *string, cache *Cache) error {
 	return nil
 }
 
-func commandInspect(c *Config, param *string, cache *Cache) error {
+func commandInspect(c *pokeconfig.Config, param *string, cache *pokecache.Cache) error {
 	pokemon, exist := c.Pokedex[*param]
 
 	if exist == false {
@@ -113,7 +109,7 @@ func commandInspect(c *Config, param *string, cache *Cache) error {
 	return nil
 }
 
-func commandPokedex(c *Config, _ *string, _ *Cache) error {
+func commandPokedex(c *pokeconfig.Config, _ *string, _ *pokecache.Cache) error {
 	fmt.Println("Your Pokedex:")
 	for name := range c.Pokedex {
 		fmt.Printf(" - %s\n", name)
@@ -121,7 +117,7 @@ func commandPokedex(c *Config, _ *string, _ *Cache) error {
 	return nil
 }
 
-func commandMap(c *Config, param *string, cache *Cache) error {
+func commandMap(c *pokeconfig.Config, param *string, cache *pokecache.Cache) error {
 	resp := get_locations(c, "next", cache)
 	for _, location := range resp.Locations {
 		fmt.Println(location.Name)
@@ -129,14 +125,14 @@ func commandMap(c *Config, param *string, cache *Cache) error {
 	return nil
 }
 
-func commandMapb(c *Config, param *string, cache *Cache) error {
+func commandMapb(c *pokeconfig.Config, param *string, cache *pokecache.Cache) error {
 	resp := get_locations(c, "previous", cache)
 	for _, location := range resp.Locations {
 		fmt.Println(location.Name)
 	}
 	return nil
 }
-func commandHelp(_ *Config, _ *string, _ *Cache) error {
+func commandHelp(_ *pokeconfig.Config, _ *string, _ *pokecache.Cache) error {
 	fmt.Println()
 	fmt.Println("Welcome to the Pokedex!")
 	fmt.Printf("Usage:\n\n")
@@ -147,7 +143,7 @@ func commandHelp(_ *Config, _ *string, _ *Cache) error {
 	return nil
 }
 
-func commandExit(_ *Config, _ *string, _ *Cache) error {
+func commandExit(_ *pokeconfig.Config, _ *string, _ *pokecache.Cache) error {
 	os.Exit(0)
 	return nil
 }
@@ -162,8 +158,8 @@ func main() {
 	commands := getCommands()
 	scanner := bufio.NewScanner(os.Stdin)
 
-	config := &Config{Pokedex: make(map[string]Pokemon)}
-	cache := NewCache(time.Minute)
+	config := &pokeconfig.Config{Pokedex: make(map[string]pokeconfig.Pokemon)}
+	cache := pokecache.NewCache(time.Minute)
 
 	for {
 		fmt.Printf("pokedex > ")
