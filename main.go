@@ -73,7 +73,7 @@ func commandExplore(c *pokeconfig.Config, param *string, cache *pokecache.Cache)
 }
 
 func commandCatch(c *pokeconfig.Config, param *string, cache *pokecache.Cache) error {
-	resp := get_pokemon(*param, cache)
+	resp := pokeapi.GetPokemon(*param, cache)
 	r := rand.Intn(resp.BaseExperience)
 	fmt.Printf("Throwing a Pokeball at %s...\n", resp.Name)
 	if r > 40 {
@@ -118,7 +118,7 @@ func commandPokedex(c *pokeconfig.Config, _ *string, _ *pokecache.Cache) error {
 }
 
 func commandMap(c *pokeconfig.Config, param *string, cache *pokecache.Cache) error {
-	resp := get_locations(c, "next", cache)
+	resp := pokeapi.GetLocations(c, "next", cache)
 	for _, location := range resp.Locations {
 		fmt.Println(location.Name)
 	}
@@ -126,7 +126,7 @@ func commandMap(c *pokeconfig.Config, param *string, cache *pokecache.Cache) err
 }
 
 func commandMapb(c *pokeconfig.Config, param *string, cache *pokecache.Cache) error {
-	resp := get_locations(c, "previous", cache)
+	resp := pokeapi.GetLocations(c, "previous", cache)
 	for _, location := range resp.Locations {
 		fmt.Println(location.Name)
 	}

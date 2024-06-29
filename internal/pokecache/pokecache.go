@@ -13,7 +13,7 @@ type cacheEntry struct {
 type Cache struct {
 	Entries  map[string]cacheEntry
 	interval time.Duration
-	Lock     sync.Mutex
+	Lock     sync.RWMutex
 }
 
 func (c *Cache) Add(key string, val []byte) {
@@ -22,6 +22,8 @@ func (c *Cache) Add(key string, val []byte) {
 	c.Entries[key] = cacheEntry{time.Now(), val}
 }
 func (c *Cache) Get(key string) ([]byte, bool) {
+	c.Lock.RLock()
+	defer c.Lock.RUnlock()
 	entry, err := c.Entries[key]
 	return entry.val, err
 }
